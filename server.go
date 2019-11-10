@@ -42,14 +42,15 @@ func handleRequest(conn net.Conn) {
 
 	if err != nil {
 		fmt.Println("Error reading:" , err.Error())
+		writeAndClose(conn, "Error reading stream: " + err.Error())
 	}
-
 
 	entity := string(buf)
 
 	reg, err := regexp.Compile("[^A-Za-z0-9]+")
 	if err != nil {
 		fmt.Println("Failed to compile regex")
+		writeAndClose(conn, "Failed to compile regex")
 	}
 
 	var sanitisedEntity = reg.ReplaceAllString(entity, "")
@@ -65,13 +66,15 @@ func handleRequest(conn net.Conn) {
 		strCpuUsage := fmt.Sprintf("%f", cpuUsage)
 
 		fmt.Println(strCpuUsage)
-		_, _ = conn.Write([]byte(strCpuUsage))
-		_ = conn.Close()
+		writeAndClose(conn, strCpuUsage)
 	case "memory":
-		_, _ = conn.Write([]byte("Yes."))
-		_ = conn.Close()
+		writeAndClose(conn, "TODO: Read free/avail memory")
 	default:
-		_, _ = conn.Write([]byte("Unrecognised command"))
-		_ = conn.Close()
+		writeAndClose(conn, "Unrecognised command: " + sanitisedEntity)
 	}
+}
+
+func writeAndClose(conn net.Conn, message string) {
+	_, _ = conn.Write([]byte(message))
+	_ = conn.Close()
 }
