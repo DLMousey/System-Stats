@@ -57,19 +57,26 @@ func handleRequest(conn net.Conn) {
 	switch sanitisedEntity {
 	case "cpu":
 		cpuLoad := lib.GetCpuLoad()
-		fmt.Println(cpuLoad)
-		writeAndClose(conn, cpuLoad)
+		writeToConsoles(conn, cpuLoad)
+		break
 	case "memory":
 		total, free := lib.ReadMemInfo()
 
 		totalStr := strconv.FormatUint(total, 10)
 		freeStr := strconv.FormatUint(free, 10)
 
-		fmt.Println("Total: %n, Free: %n", total, free)
-		writeAndClose(conn, "Total: " + totalStr + "kb Free: " + freeStr + "kb")
+		writeToConsoles(conn, "Total: " + totalStr + "kb Free: " + freeStr + "kb")
+		break
 	default:
-		writeAndClose(conn, "Unrecognised command: " + sanitisedEntity)
+		writeToConsoles(conn, "Unrecognised command: " + sanitisedEntity)
 	}
+
+	_ = conn.Close()
+}
+
+func writeToConsoles(conn net.Conn, message string) {
+	fmt.Println(message)
+	_, _ = conn.Write([]byte(message))
 }
 
 func writeAndClose(conn net.Conn, message string) {
