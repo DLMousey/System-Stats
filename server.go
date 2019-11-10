@@ -56,6 +56,7 @@ func handleRequest(conn net.Conn) {
 	var sanitisedEntity = reg.ReplaceAllString(entity, "")
 	switch sanitisedEntity {
 	case "cpu":
+		writeToConsoles(conn,"Calculating CPU Load...")
 		cpuLoad := lib.GetCpuLoad()
 		writeToConsoles(conn, cpuLoad)
 	case "memory":
