@@ -58,7 +58,6 @@ func handleRequest(conn net.Conn) {
 	case "cpu":
 		cpuLoad := lib.GetCpuLoad()
 		writeToConsoles(conn, cpuLoad)
-		break
 	case "memory":
 		total, free := lib.ReadMemInfo()
 
@@ -66,7 +65,6 @@ func handleRequest(conn net.Conn) {
 		freeStr := strconv.FormatUint(free, 10)
 
 		writeToConsoles(conn, "Total: " + totalStr + "kb Free: " + freeStr + "kb")
-		break
 	default:
 		writeToConsoles(conn, "Unrecognised command: " + sanitisedEntity)
 	}
