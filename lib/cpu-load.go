@@ -5,9 +5,10 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"time"
 )
 
-func CpuLoad() (idle, total uint64) {
+func ReadProcStat() (idle, total uint64) {
 	contents, err := ioutil.ReadFile("/proc/stat")
 
 	if err != nil {
@@ -36,4 +37,16 @@ func CpuLoad() (idle, total uint64) {
 	}
 
 	return
+}
+
+func GetCpuLoad() string {
+	idle0, total0 := ReadProcStat()
+	time.Sleep(3 * time.Second)
+	idle1, total1 := ReadProcStat()
+
+	idleTicks := float64(idle1 - idle0)
+	totalTicks := float64(total1 - total0)
+	cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
+
+	return fmt.Sprintf("%f", cpuUsage)
 }

@@ -5,8 +5,8 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"strconv"
 	"tcp-server/lib"
-	"time"
 )
 
 const (
@@ -56,19 +56,17 @@ func handleRequest(conn net.Conn) {
 	var sanitisedEntity = reg.ReplaceAllString(entity, "")
 	switch sanitisedEntity {
 	case "cpu":
-		idle0, total0 := lib.CpuLoad()
-		time.Sleep(3 * time.Second)
-		idle1, total1 := lib.CpuLoad()
-
-		idleTicks := float64(idle1 - idle0)
-		totalTicks := float64(total1 - total0)
-		cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
-		strCpuUsage := fmt.Sprintf("%f", cpuUsage)
-
-		fmt.Println(strCpuUsage)
-		writeAndClose(conn, strCpuUsage)
+		cpuLoad := lib.GetCpuLoad()
+		fmt.Println(cpuLoad)
+		writeAndClose(conn, cpuLoad)
 	case "memory":
-		writeAndClose(conn, "TODO: Read free/avail memory")
+		total, free := lib.ReadMemInfo()
+
+		totalStr := strconv.FormatUint(total, 10)
+		freeStr := strconv.FormatUint(free, 10)
+
+		fmt.Println("Total: %n, Free: %n", total, free)
+		writeAndClose(conn, "Total: " + totalStr + "kb Free: " + freeStr + "kb")
 	default:
 		writeAndClose(conn, "Unrecognised command: " + sanitisedEntity)
 	}
